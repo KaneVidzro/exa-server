@@ -1,5 +1,3 @@
-// apps/api/src/controllers/v1/user/delete.controller.ts
-
 import { Request, Response } from "express";
 import { prisma } from "../../config/prisma";
 
@@ -17,7 +15,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     // destroy session and clear cookie
     req.session.destroy(() => {
-      res.clearCookie("trenclad-session");
+      res.clearCookie("exa-session");
       return res.status(200).json({ message: "Account deleted successfully" });
     });
   } catch {

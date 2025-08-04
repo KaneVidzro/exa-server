@@ -27,9 +27,6 @@ export const userPaths = {
       },
       security: [{ cookieAuth: [] }],
     },
-  },
-
-  "/user/update": {
     put: {
       tags: ["User"],
       summary: "Update user profile",
@@ -55,9 +52,6 @@ export const userPaths = {
       },
       security: [{ cookieAuth: [] }],
     },
-  },
-
-  "/user/delete": {
     delete: {
       tags: ["User"],
       summary: "Delete current user",

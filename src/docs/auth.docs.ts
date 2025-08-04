@@ -50,7 +50,7 @@ export const authPaths = {
       },
     },
   },
-  "/auth/verify": {
+  "/auth/verify-email": {
     post: {
       tags: ["Auth"],
       summary: "Verify user email",
@@ -60,9 +60,8 @@ export const authPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["email", "token"],
+              required: ["token"],
               properties: {
-                email: { type: "string", format: "email" },
                 token: { type: "string" },
               },
             },
@@ -76,10 +75,10 @@ export const authPaths = {
       },
     },
   },
-  "/auth/recover": {
+  "/auth/forgot-password": {
     post: {
       tags: ["Auth"],
-      summary: "Send recovery email",
+      summary: "Request Password Reset",
       requestBody: {
         required: true,
         content: {
@@ -101,7 +100,7 @@ export const authPaths = {
       },
     },
   },
-  "/auth/reset": {
+  "/auth/reset-password": {
     post: {
       tags: ["Auth"],
       summary: "Reset user password",
@@ -111,11 +110,10 @@ export const authPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["token", "email", "password"],
+              required: ["token", "newPassword"],
               properties: {
-                email: { type: "string", format: "email" },
                 token: { type: "string" },
-                password: { type: "string", format: "password" },
+                newPassword: { type: "string", format: "password" },
               },
             },
           },
@@ -138,7 +136,7 @@ export const authPaths = {
       },
     },
   },
-  "/auth/resend": {
+  "/auth/resend-verification": {
     post: {
       tags: ["Auth"],
       summary: "Resend verification email",

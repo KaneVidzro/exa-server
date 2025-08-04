@@ -1,29 +1,31 @@
 import nodemailer from "nodemailer";
+import { render } from "@react-email/components";
 
 const transporter = nodemailer.createTransport({
-  pool: true,
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
-  secure: false, // true for 465, false for other ports
+  secure: process.env.SMTP_SECURE === "true",
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
 });
 
-export async function sendMail({
+export const sendMail = async ({
   to,
   subject,
-  html,
+  react,
 }: {
   to: string;
   subject: string;
-  html: string;
-}) {
-  return transporter.sendMail({
-    from: `Exa Dashboard <${process.env.SMTP_USER}>`,
+  react: React.ReactNode;
+}) => {
+  const html = await render(react);
+
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM,
     to,
     subject,
     html,
   });
-}
+};

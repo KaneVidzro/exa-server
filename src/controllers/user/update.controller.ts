@@ -1,5 +1,3 @@
-// apps/api/src/controllers/v1/user/update.controller.ts
-
 import { Request, Response } from "express";
 import { prisma } from "../../config/prisma";
 

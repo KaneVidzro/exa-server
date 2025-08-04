@@ -1,11 +1,9 @@
-// apps/api/src/controllers/v1/auth/recover.controller.ts
-// This controller handles user recover functionality
-
 import { Request, Response } from "express";
-import { sendMail } from "../../utils/email";
+import { sendMail } from "../../utils/mailer";
 import { prisma } from "../../config/prisma";
 import { randomBytes } from "crypto";
 import { BASE_URL } from "../../config/constants";
+import { ForgotPasswordEmail } from "../../emails/ForgotPasswordEmail";
 
 export const forgot = async (req: Request, res: Response) => {
   const { email } = req.body;
@@ -14,35 +12,43 @@ export const forgot = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Missing email" });
   }
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const normalizedEmail = email.toLowerCase().trim();
+
+  const user = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+  });
 
   if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    return res
+      .status(404)
+      .json({ message: "If the email exists, a reset link has been sent" });
   }
 
   // delete any existing recovery tokens for this user
-  await prisma.resetToken.deleteMany({
-    where: { identifier: email },
+  await prisma.passwordResetToken.deleteMany({
+    where: { id: user.id },
   });
 
   const token = randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 1);
 
-  await prisma.resetToken.create({
+  await prisma.passwordResetToken.create({
     data: {
-      identifier: email,
       token,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 1), // 1 hour
+      userId: user.id,
+      expiresAt,
     },
   });
 
+  const resetUrl = `${BASE_URL}/reset-password?token=${token}`;
+
   await sendMail({
     to: user.email,
-    subject: "Recover your password",
-    html: `
-      <h1>Recover your password</h1>
-      <p>Click the link below to recover your password:</p>
-     <a href="${BASE_URL}/auth/reset?token=${token}&email=${email}">Recover password</a>
-    `,
+    subject: "Password Reset Request",
+    react: ForgotPasswordEmail({
+      name: user.name,
+      resetUrl,
+    }),
   });
 
   res.status(200).json({
